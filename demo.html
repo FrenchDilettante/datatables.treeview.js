@@ -1,0 +1,39 @@
+<html>
+  <head>
+    <title>DataTables TreeView Demo Page</title>
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link href="node_modules/datatables/media/css/jquery.dataTables.css" rel="stylesheet" type="text/css">
+
+    <script src="node_modules/jquery/dist/jquery.js"></script>
+    <script src="node_modules/datatables/media/js/jquery.dataTables.js"></script>
+    <script src="index.js"></script>
+  </head>
+
+  <body>
+    <div class="container">
+      <h1>datatables.treeview.js demo</h1>
+
+      <table id="demo-grid"></table>
+
+      <script>
+        $('#demo-grid').dataTable({
+          columns: [{
+            data: 'name',
+            title: 'Name',
+          }, {
+            data: 'revenue',
+            title: 'Overall Revenue',
+          }],
+          data: [
+            {name: 'Appy McApface', revenue: 2.45},
+            {name: 'Shippy McShipface', revenue: 3.45},
+          ],
+          treeView: {
+            margin: 30,
+          },
+        });
+      </script>
+    </div>
+  </body>
+</html>
