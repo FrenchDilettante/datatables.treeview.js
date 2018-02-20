@@ -1,6 +1,7 @@
 // Karma configuration
 // Generated on Mon Feb 19 2018 13:31:53 GMT+0000 (GMT)
 
+/* eslint-env node */
 module.exports = function(config) {
   config.set({
 
@@ -17,8 +18,8 @@ module.exports = function(config) {
     files: [
       'node_modules/jquery/dist/jquery.js',
       'node_modules/datatables/media/js/jquery.dataTables.js',
-      'index.js',
-      'test/*.js'
+      'datatables.treeview.js',
+      'test/*.js',
     ],
 
 
@@ -30,7 +31,7 @@ module.exports = function(config) {
     // preprocess matching files before serving them to the browser
     // available preprocessors: https://npmjs.org/browse/keyword/karma-preprocessor
     preprocessors: {
-      'index.js': ['coverage'],
+      'datatables.treeview.js': ['coverage'],
     },
 
 

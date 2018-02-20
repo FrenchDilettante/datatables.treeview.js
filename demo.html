@@ -7,7 +7,7 @@
 
     <script src="node_modules/jquery/dist/jquery.js"></script>
     <script src="node_modules/datatables/media/js/jquery.dataTables.js"></script>
-    <script src="index.js"></script>
+    <script src="datatables.treeview.js"></script>
   </head>
 
   <body>
@@ -26,7 +26,10 @@
             title: 'Overall Revenue',
           }],
           data: [
-            {name: 'Appy McApface', revenue: 2.45},
+            {name: 'Appy McApface', revenue: 2.45, children: [
+              {name: 'Appy McApface Jr', revenue: 5},
+              {name: 'Disappointing Child McApface', revenue: 0},
+            ]},
             {name: 'Shippy McShipface', revenue: 3.45},
           ],
           treeView: {

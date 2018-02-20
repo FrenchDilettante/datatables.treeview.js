@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "description": "DataTables Tree View Plugin",
   "homepage": "https://git.ouroath.com/ebourge/datatables.treeview.js",
-  "main": "index.js",
+  "main": "datatables.treeview.js",
   "scripts": {
     "build": "gulp build",
     "test": "karma start --single-run",
