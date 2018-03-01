@@ -1,6 +1,6 @@
 # datatables.treeview.js
 
-[DataTables](https://datatables.net/) plugin to display
+[DataTables](https://datatables.net/) plugin to display child rows.
 
 ## Installation
 
