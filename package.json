@@ -1,6 +1,6 @@
 {
   "name": "datatables.treeview",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "DataTables Tree View Plugin",
   "homepage": "https://git.ouroath.com/ebourge/datatables.treeview.js",
   "main": "datatables.treeview.js",
