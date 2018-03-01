@@ -8,6 +8,10 @@
     <script src="node_modules/jquery/dist/jquery.js"></script>
     <script src="node_modules/datatables/media/js/jquery.dataTables.js"></script>
     <script src="datatables.treeview.js"></script>
+
+    <style>
+      .dt-tree-spacer { margin-left: 15px; }
+    </style>
   </head>
 
   <body>
@@ -15,28 +19,30 @@
       <h1>datatables.treeview.js demo</h1>
 
       <table id="demo-grid"></table>
-
-      <script>
-        $('#demo-grid').dataTable({
-          columns: [{
-            data: 'name',
-            title: 'Name',
-          }, {
-            data: 'revenue',
-            title: 'Overall Revenue',
-          }],
-          data: [
-            {name: 'Appy McApface', revenue: 2.45, children: [
-              {name: 'Appy McApface Jr', revenue: 5},
-              {name: 'Disappointing Child McApface', revenue: 0},
-            ]},
-            {name: 'Shippy McShipface', revenue: 3.45},
-          ],
-          treeView: {
-            margin: 30,
-          },
-        });
-      </script>
     </div>
+
+    <script>
+      $('#demo-grid').dataTable({
+        columns: [{
+          data: 'name',
+          title: 'Name',
+        }, {
+          data: 'revenue',
+          title: 'Overall Revenue',
+        }],
+        data: [
+          {name: 'Appy McApface', revenue: 2.45, children: [
+            {name: 'Appy McApface Jr', revenue: 5},
+            {name: 'Disappointing Child McApface', revenue: 0},
+          ]},
+          {name: 'Shippy McShipface', revenue: 3.45},
+        ],
+        treeView: {
+          margin: 30,
+          hasChildren: row => row.children && row.children.length > 0,
+          getChildren: (row, rowIndex, callback) => callback(row.children),
+        },
+      });
+    </script>
   </body>
 </html>

@@ -36,7 +36,7 @@ gulp.task('build', () =>
     }))
     .pipe(iife({
       args: ['$', 'window', 'window.document'],
-      params: ['$', 'window', 'document', 'undefined'],
+      params: ['$', 'window', 'document'],
       useStrict: false,
     }))
     .pipe(concat.header(header))

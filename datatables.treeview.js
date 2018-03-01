@@ -1,10 +1,10 @@
 /*!
-* datatables.treeview v0.0.0
+* datatables.treeview v0.1.0
 * DataTables Tree View Plugin
 * Copyright Oath Inc. Apache-2.0
 * https://git.ouroath.com/ebourge/datatables.treeview.js
 */
-;(function($, window, document, undefined) {
+;(function($, window, document) {
 'use strict';
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -32,7 +32,7 @@ var TreeView = function () {
     this.prependExpandIcons();
 
     table.on('click', '.dt-tree-toggle', function (event) {
-      return _this.toggleRow(_this.api.row($(event.target).parent()));
+      return _this.toggleRow(_this.api.row($(event.target).parents('tr').first()));
     });
   }
 
@@ -42,27 +42,40 @@ var TreeView = function () {
   };
 
   TreeView.prototype.collapseIcon = function collapseIcon(row) {
-    this.renderIcon('collapse').replaceAll($(row.node()).find('.dt-tree-toggle'));
+    $(row.node()).find('.dt-tree-loading').remove();
+    if (this.options.collapseIcon) {
+      this.renderIcon('collapse').addClass('expanded').replaceAll($(row.node()).find('.dt-tree-toggle'));
+    } else {
+      $(row.node()).find('.dt-tree-toggle').addClass('expanded').show();
+    }
   };
 
   TreeView.prototype.expand = function expand(parentRow) {
     var _this2 = this;
 
     var rowData = parentRow.data();
-    this.collapseIcon(parentRow);
 
     if (parentRow.child()) {
+      this.collapseIcon(parentRow);
       parentRow.child.show();
     } else {
-      var newRows = rowData[this.options.key].map(function (data) {
-        return _this2.renderChildRow(parentRow, data).node();
+      this.showLoadingIcon(parentRow);
+      this.options.getChildren(rowData, parentRow.index(), function (children) {
+        var newRows = children.map(function (data) {
+          return _this2.renderChildRow(parentRow, data).node();
+        });
+        _this2.collapseIcon(parentRow);
+        parentRow.child(newRows).show();
       });
-      parentRow.child(newRows).show();
     }
   };
 
   TreeView.prototype.expandIcon = function expandIcon(row) {
-    this.renderIcon('expand').replaceAll($(row.node()).find('.dt-tree-toggle'));
+    if (this.options.collapseIcon) {
+      this.renderIcon('expand').replaceAll($(row.node()).find('.dt-tree-toggle'));
+    } else {
+      $(row.node()).find('.dt-tree-toggle').removeClass('expanded');
+    }
   };
 
   TreeView.prototype.firstVisibleColumn = function firstVisibleColumn() {
@@ -75,16 +88,18 @@ var TreeView = function () {
     this.firstVisibleColumn().nodes().to$().each(function (index, element) {
       var $el = $(element);
       var rowData = _this3.api.row(index).data();
-      if (!rowData[_this3.options.key]) return;
-
-      $el.prepend(_this3.renderIcon('expand'));
+      if (!_this3.options.hasChildren(rowData, index)) {
+        $el.addClass('dt-tree-childless');
+      } else {
+        $el.prepend(_this3.renderIcon('expand'));
+      }
     });
   };
 
   TreeView.prototype.renderChildRow = function renderChildRow(parentRow, data) {
     var row = this.api.row.add(data);
     var cell = this.api.cell(row.index(), this.firstVisibleColumn().index()).node();
-    $(cell).prepend(this.renderSpacer(0));
+    $(cell).prepend(this.options.spacer);
     $(row.node()).detach();
     return row;
   };
@@ -95,10 +110,9 @@ var TreeView = function () {
     return icon;
   };
 
-  TreeView.prototype.renderSpacer = function renderSpacer(level) {
-    var spacer = $('<span></span>');
-    spacer.css('margin-left', this.options.margin * (level + 1) + 'px');
-    return spacer;
+  TreeView.prototype.showLoadingIcon = function showLoadingIcon(row) {
+    $(row.node()).find('.dt-tree-toggle').hide();
+    $(this.api.cell(row.index(), this.firstVisibleColumn().index()).node()).prepend(this.options.loadingIcon);
   };
 
   TreeView.prototype.toggleRow = function toggleRow(row) {
@@ -113,11 +127,10 @@ var TreeView = function () {
 }();
 
 TreeView.defaults = {
-  margin: 15,
-  spacer: '<span></span>',
+  spacer: '<span class="dt-tree-spacer"></span>',
   expandIcon: '<button>+</button>',
   collapseIcon: '<button>-</button>',
-  key: 'children'
+  loadingIcon: '<span class="dt-tree-loading">...</span>'
 };
 
 $.fn.dataTable.TreeView = $.fn.DataTable.TreeView = TreeView;

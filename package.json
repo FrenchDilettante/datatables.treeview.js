@@ -6,6 +6,7 @@
   "main": "datatables.treeview.js",
   "scripts": {
     "build": "gulp build",
+    "prepublish": "gulp build",
     "test": "karma start --single-run",
     "test:watch": "karma start"
   },
