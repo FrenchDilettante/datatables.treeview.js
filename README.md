@@ -14,7 +14,10 @@ Add `node_modules/datatables.treeview/datatables.treeview.js` to your files.
 
 ```javascript
 $().dataTables({
-  treeView: true,
+  treeView: {
+    hasChildren: row => row.children.length > 0,
+    getChildren: (row, index, callback) => callback(row.children),
+  },
   /* ... */
 });
 ```
