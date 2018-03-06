@@ -1,8 +1,9 @@
 /*!
 * datatables.treeview v0.2.0
 * DataTables Tree View Plugin
-* Copyright Oath Inc. Apache-2.0
-* https://git.ouroath.com/ebourge/datatables.treeview.js
+* Copyright 2018, Oath
+* Licensed under the terms of the MIT license.
+* See LICENSE file in https://git.ouroath.com/ebourge/datatables.treeview.js for terms.
 */
 ;(function($, window, document) {
 'use strict';

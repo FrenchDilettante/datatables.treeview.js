@@ -19,8 +19,9 @@ const files = [
 const header = template(`/*!
 * <%= name %> v<%= version %>
 * <%= description %>
-* Copyright <%= author %> <%= license %>
-* <%= homepage %>
+* Copyright 2018, <%= author %>
+* Licensed under the terms of the <%= license %> license.
+* See LICENSE file in <%= homepage %> for terms.
 */
 `)(package);
 
