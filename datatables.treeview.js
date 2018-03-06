@@ -27,7 +27,7 @@ var TreeView = function () {
     this.options = $.extend({}, TreeView.defaults, options);
     this.api = table.dataTable().api();
 
-    this.api.on('render', function () {
+    this.api.on('draw', function () {
       return _this.prependExpandIcons();
     });
     this.prependExpandIcons();

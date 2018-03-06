@@ -11,7 +11,7 @@ class TreeView {
     this.options = $.extend({}, TreeView.defaults, options);
     this.api = table.dataTable().api();
 
-    this.api.on('render', () => this.prependExpandIcons());
+    this.api.on('draw', () => this.prependExpandIcons());
     this.prependExpandIcons();
 
     table.on('click', '.dt-tree-toggle',
