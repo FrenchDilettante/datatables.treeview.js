@@ -101,7 +101,10 @@ class TreeView {
   }
 
   onToggleClick(event) {
-    const $toggle = $(event.target);
+    let $toggle = $(event.target);
+    if (!$toggle.is('.dt-tree-toggle')) {
+      $toggle = $toggle.parents('.dt-tree-toggle').first();
+    }
     const row = this.api.row($toggle.parents('tr').first());
     this.toggleRow(row, $toggle.data('dt-tree-level'));
   }
@@ -140,8 +143,12 @@ class TreeView {
 
   showLoadingIcon(row) {
     $(row.node()).find('.dt-tree-toggle').hide();
-    $(this.api.cell(row.index(), this.firstVisibleColumn().index()).node())
-      .prepend(this.options.loadingIcon);
+    const $cell = $(this.api.cell(row.index(), this.firstVisibleColumn().index()).node());
+    if ($cell.find('.dt-tree-spacer').length > 0) {
+      $cell.find('.dt-tree-spacer').last().after(this.options.loadingIcon);
+    } else {
+      $cell.prepend(this.options.loadingIcon);
+    }
   }
 
   toggleRow(row, level) {

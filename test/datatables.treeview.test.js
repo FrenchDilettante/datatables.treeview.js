@@ -194,8 +194,9 @@ describe('datatables.treeview.js', () => {
   });
 
   describe('onToggleClick', () => {
+    beforeEach(() => spyOn(treeView, 'toggleRow'));
+
     it('should extract information from the jQuery event object', () => {
-      spyOn(treeView, 'toggleRow');
       treeView.onToggleClick({
         target: table.find('tr:eq(1) .dt-tree-toggle')[0],
       });
@@ -203,6 +204,41 @@ describe('datatables.treeview.js', () => {
       expect(treeView.toggleRow.calls.mostRecent().args[0].node())
         .toBe(api.row(0).node());
       expect(treeView.toggleRow.calls.mostRecent().args[1]).toBe(0);
+    });
+
+    it('should handle more complex toggle templates', () => {
+      const $toggle = table.find('tr:eq(1) .dt-tree-toggle');
+      $toggle.html('<span>click me</span>');
+      treeView.onToggleClick({
+        target: $toggle.children()[0],
+      });
+      expect(treeView.toggleRow).toHaveBeenCalled();
+      expect(treeView.toggleRow.calls.mostRecent().args[0].node())
+        .toBe(api.row(0).node());
+    });
+  });
+
+  describe('showLoadingIcon', () => {
+    it('should place the loading icon at the beginning of the cell', () => {
+      const row = api.row(0);
+      treeView.showLoadingIcon(row);
+      expect($(row.node()).children()[0].innerHTML)
+        .toBe(
+          '<span class="dt-tree-loading">...</span>' +
+          '<button class="dt-tree-toggle" style="display: none;">+</button>' +
+          'Row 1');
+    });
+
+    it('should place the loading icon after the spacers', () => {
+      const row = api.row(0);
+      $(row.node()).children().first().prepend(treeView.options.spacer);
+      treeView.showLoadingIcon(row);
+      expect($(row.node()).children()[0].innerHTML)
+        .toBe(
+          '<span class="dt-tree-spacer"></span>' +
+          '<span class="dt-tree-loading">...</span>' +
+          '<button class="dt-tree-toggle" style="display: none;">+</button>' +
+          'Row 1');
     });
   });
 
