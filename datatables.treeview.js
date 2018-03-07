@@ -1,5 +1,5 @@
 /*!
-* datatables.treeview v0.3.0
+* datatables.treeview v0.3.1
 * DataTables Tree View Plugin
 * Copyright 2018, Oath
 * Licensed under the terms of the MIT license.
