@@ -11,16 +11,27 @@ class TreeView {
     this.options = $.extend({}, TreeView.defaults, options);
     this.api = table.dataTable().api();
 
-    this.api.on('draw', () => this.prependExpandIcons());
-    this.prependExpandIcons();
+    this.api.on('draw', () => this.onDraw());
+    this.prepareAllRows();
 
-    table.on('click', '.dt-tree-toggle',
-      (event) => this.toggleRow(this.api.row($(event.target).parents('tr').first())));
+    table.on('click', '.dt-tree-toggle', event => this.onToggleClick(event));
   }
 
   collapse(parentRow) {
     this.expandIcon(parentRow);
+    this.collapseChildRows(parentRow);
     parentRow.child.hide();
+  }
+
+  collapseAllRows() {
+    this.api.rows().each((index, row) => this.collapse(this.api.row(row)));
+  }
+
+  collapseChildRows(parentRow) {
+    if (parentRow.child()) {
+      parentRow.child()
+        .each((index, childRow) => this.collapse(this.api.row(childRow)));
+    }
   }
 
   collapseIcon(row) {
@@ -37,7 +48,14 @@ class TreeView {
     }
   }
 
-  expand(parentRow) {
+  createSpacer($cell, level) {
+    for (let i = 0; i < level; i++) {
+      $cell.prepend(this.options.spacer);
+    }
+    $cell.addClass(`dt-tree-level-${level}`);
+  }
+
+  expand(parentRow, level) {
     const rowData = parentRow.data();
 
     if (parentRow.child()) {
@@ -45,8 +63,8 @@ class TreeView {
       parentRow.child.show();
     } else {
       this.showLoadingIcon(parentRow);
-      this.options.getChildren(rowData, parentRow.index(), (children) => {
-        const newRows = children.map(data => this.renderChildRow(parentRow, data).node());
+      this.options.getChildren(rowData, (children) => {
+        const newRows = children.map(data => this.renderChildRow(parentRow, data, level).node());
         this.collapseIcon(parentRow);
         parentRow.child(newRows).show();
       });
@@ -55,8 +73,10 @@ class TreeView {
 
   expandIcon(row) {
     if (this.options.collapseIcon) {
+      const $toggle = $(row.node()).find('.dt-tree-toggle');
       this.renderIcon('expand')
-        .replaceAll($(row.node()).find('.dt-tree-toggle'));
+        .data('dt-tree-level', $toggle.data('dt-tree-level'))
+        .replaceAll($toggle);
     } else {
       $(row.node())
         .find('.dt-tree-toggle')
@@ -68,32 +88,53 @@ class TreeView {
     return this.api.column('0:visible');
   }
 
-  prependExpandIcons() {
+  isAlreadyProcessed() {
+    return this.table.find('.dt-tree-toggle, .dt-tree-childless').length > 0;
+  }
+
+  onDraw() {
+    if (!this.isAlreadyProcessed()) {
+      this.prepareAllRows();
+    } else {
+      this.collapseAllRows();
+    }
+  }
+
+  onToggleClick(event) {
+    const $toggle = $(event.target);
+    const row = this.api.row($toggle.parents('tr').first());
+    this.toggleRow(row, $toggle.data('dt-tree-level'));
+  }
+
+  prepareAllRows() {
     this.firstVisibleColumn()
       .nodes()
       .to$()
-      .each((index, element) => {
-        const $el = $(element);
-        const rowData = this.api.row(index).data();
-        if (!this.options.hasChildren(rowData, index)) {
-          $el.addClass('dt-tree-childless');
-        } else {
-          $el.prepend(this.renderIcon('expand'));
-        }
-      });
+      .each((index, element) => this.prepareSingleRow(element, this.api.row(index).data(), 0));
   }
 
-  renderChildRow(parentRow, data) {
+  prepareSingleRow(cellElement, rowData, level) {
+    const $el = $(cellElement);
+    if (!this.options.hasChildren(rowData)) {
+      $el.addClass('dt-tree-childless');
+    } else {
+      $el.prepend(this.renderIcon('expand', level));
+    }
+    this.createSpacer($el, level);
+  }
+
+  renderChildRow(parentRow, data, parentLevel) {
     const row = this.api.row.add(data);
     const cell = this.api.cell(row.index(), this.firstVisibleColumn().index()).node();
-    $(cell).prepend(this.options.spacer);
+    this.prepareSingleRow(cell, data, parentLevel + 1);
     $(row.node()).detach();
     return row;
   }
 
-  renderIcon(direction) {
+  renderIcon(direction, level) {
     const icon = $(this.options[`${direction}Icon`]);
-    icon.addClass('dt-tree-toggle');
+    icon.addClass('dt-tree-toggle')
+      .data('dt-tree-level', level);
     return icon;
   }
 
@@ -103,11 +144,11 @@ class TreeView {
       .prepend(this.options.loadingIcon);
   }
 
-  toggleRow(row) {
+  toggleRow(row, level) {
     if (row.child.isShown()) {
       this.collapse(row);
     } else {
-      this.expand(row);
+      this.expand(row, level);
     }
   }
 }

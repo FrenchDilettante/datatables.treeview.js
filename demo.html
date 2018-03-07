@@ -22,6 +22,14 @@
     </div>
 
     <script>
+      const children = [
+        {name: 'Appy McApface Jr', revenue: 5},
+        {name: 'Disappointing Child McApface', revenue: 0},
+      ];
+
+      // n-level tree
+      children[0].children = children;
+
       $('#demo-grid').dataTable({
         columns: [{
           data: 'name',
@@ -31,16 +39,13 @@
           title: 'Overall Revenue',
         }],
         data: [
-          {name: 'Appy McApface', revenue: 2.45, children: [
-            {name: 'Appy McApface Jr', revenue: 5},
-            {name: 'Disappointing Child McApface', revenue: 0},
-          ]},
+          {name: 'Appy McApface', revenue: 2.45, children: children},
           {name: 'Shippy McShipface', revenue: 3.45},
         ],
         treeView: {
           margin: 30,
           hasChildren: row => row.children && row.children.length > 0,
-          getChildren: (row, rowIndex, callback) => callback(row.children),
+          getChildren: (row, callback) => callback(row.children),
         },
       });
     </script>

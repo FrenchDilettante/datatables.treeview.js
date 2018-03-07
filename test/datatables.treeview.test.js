@@ -30,7 +30,7 @@ describe('datatables.treeview.js', () => {
       hasChildren: jasmine.createSpy('hasChildren')
         .and.callFake(row => row.name === 'Row 1'),
       getChildren: jasmine.createSpy('getChildren')
-        .and.callFake((row, index, callback) => callback(row.children)),
+        .and.callFake((row, callback) => callback(row.children)),
     };
 
     treeView = new TreeView(table, options);
@@ -68,6 +68,42 @@ describe('datatables.treeview.js', () => {
 
       expect(toggle.text()).toBe('+');
       expect(toggle.is('.expanded')).toBe(false);
+    });
+
+    it('should collapse child rows as well', () => {
+      spyOn(treeView, 'collapseChildRows');
+      const row = api.row(0);
+      treeView.expand(row);
+      treeView.collapse(row);
+      expect(treeView.collapseChildRows).toHaveBeenCalled();
+      expect(treeView.collapseChildRows.calls.mostRecent().args[0].node())
+        .toBe(row.node());
+    });
+  });
+
+  describe('collapseAllRows', () => {
+    it('should collapse all rows present in the table', () => {
+      treeView.expand(api.row(0));
+      treeView.collapseAllRows();
+      expect(api.row(0).child.isShown()).toBe(false);
+    });
+  });
+
+  describe('createSpacer', () => {
+    function emptyCell() {
+      return $('<td></td>');
+    }
+
+    it('should create spacers to match the level', () => {
+      let $cell = emptyCell();
+      treeView.createSpacer($cell, 0);
+      expect($cell.is('.dt-tree-level-0')).toBe(true);
+      expect($cell.find('.dt-tree-spacer').length).toBe(0);
+
+      $cell = emptyCell();
+      treeView.createSpacer($cell, 2);
+      expect($cell.is('.dt-tree-level-2')).toBe(true);
+      expect($cell.find('.dt-tree-spacer').length).toBe(2);
     });
   });
 
@@ -120,6 +156,53 @@ describe('datatables.treeview.js', () => {
       expect(treeView.firstVisibleColumn().index()).toBe(0);
       api.column(0).visible(false);
       expect(treeView.firstVisibleColumn().index()).toBe(1);
+    });
+  });
+
+  describe('isAlreadyProcessed', () => {
+    it('should indicate that the rows have already been processed', () => {
+      expect(treeView.isAlreadyProcessed()).toBe(true);
+
+      // Manually remove the relevant markers
+      table.find('.dt-tree-toggle').remove();
+      table.find('.dt-tree-childless').removeClass('dt-tree-childless');
+
+      expect(treeView.isAlreadyProcessed()).toBe(false);
+    });
+  });
+
+  describe('onDraw', () => {
+    beforeEach(() => {
+      spyOn(treeView, 'isAlreadyProcessed');
+      spyOn(treeView, 'prepareAllRows');
+      spyOn(treeView, 'collapseAllRows');
+    });
+
+    it('should prepare rows if they are not already so', () => {
+      treeView.isAlreadyProcessed.and.returnValue(false);
+      treeView.onDraw();
+      expect(treeView.prepareAllRows).toHaveBeenCalled();
+      expect(treeView.collapseAllRows).not.toHaveBeenCalled();
+    });
+
+    it('should collapse all child rows if they were already prepared', () => {
+      treeView.isAlreadyProcessed.and.returnValue(true);
+      treeView.onDraw();
+      expect(treeView.prepareAllRows).not.toHaveBeenCalled();
+      expect(treeView.collapseAllRows).toHaveBeenCalled();
+    });
+  });
+
+  describe('onToggleClick', () => {
+    it('should extract information from the jQuery event object', () => {
+      spyOn(treeView, 'toggleRow');
+      treeView.onToggleClick({
+        target: table.find('tr:eq(1) .dt-tree-toggle')[0],
+      });
+      expect(treeView.toggleRow).toHaveBeenCalled();
+      expect(treeView.toggleRow.calls.mostRecent().args[0].node())
+        .toBe(api.row(0).node());
+      expect(treeView.toggleRow.calls.mostRecent().args[1]).toBe(0);
     });
   });
 

@@ -28,18 +28,37 @@ var TreeView = function () {
     this.api = table.dataTable().api();
 
     this.api.on('draw', function () {
-      return _this.prependExpandIcons();
+      return _this.onDraw();
     });
-    this.prependExpandIcons();
+    this.prepareAllRows();
 
     table.on('click', '.dt-tree-toggle', function (event) {
-      return _this.toggleRow(_this.api.row($(event.target).parents('tr').first()));
+      return _this.onToggleClick(event);
     });
   }
 
   TreeView.prototype.collapse = function collapse(parentRow) {
     this.expandIcon(parentRow);
+    this.collapseChildRows(parentRow);
     parentRow.child.hide();
+  };
+
+  TreeView.prototype.collapseAllRows = function collapseAllRows() {
+    var _this2 = this;
+
+    this.api.rows().each(function (index, row) {
+      return _this2.collapse(_this2.api.row(row));
+    });
+  };
+
+  TreeView.prototype.collapseChildRows = function collapseChildRows(parentRow) {
+    var _this3 = this;
+
+    if (parentRow.child()) {
+      parentRow.child().each(function (index, childRow) {
+        return _this3.collapse(_this3.api.row(childRow));
+      });
+    }
   };
 
   TreeView.prototype.collapseIcon = function collapseIcon(row) {
@@ -51,8 +70,15 @@ var TreeView = function () {
     }
   };
 
-  TreeView.prototype.expand = function expand(parentRow) {
-    var _this2 = this;
+  TreeView.prototype.createSpacer = function createSpacer($cell, level) {
+    for (var i = 0; i < level; i++) {
+      $cell.prepend(this.options.spacer);
+    }
+    $cell.addClass('dt-tree-level-' + level);
+  };
+
+  TreeView.prototype.expand = function expand(parentRow, level) {
+    var _this4 = this;
 
     var rowData = parentRow.data();
 
@@ -61,11 +87,11 @@ var TreeView = function () {
       parentRow.child.show();
     } else {
       this.showLoadingIcon(parentRow);
-      this.options.getChildren(rowData, parentRow.index(), function (children) {
+      this.options.getChildren(rowData, function (children) {
         var newRows = children.map(function (data) {
-          return _this2.renderChildRow(parentRow, data).node();
+          return _this4.renderChildRow(parentRow, data, level).node();
         });
-        _this2.collapseIcon(parentRow);
+        _this4.collapseIcon(parentRow);
         parentRow.child(newRows).show();
       });
     }
@@ -73,7 +99,8 @@ var TreeView = function () {
 
   TreeView.prototype.expandIcon = function expandIcon(row) {
     if (this.options.collapseIcon) {
-      this.renderIcon('expand').replaceAll($(row.node()).find('.dt-tree-toggle'));
+      var $toggle = $(row.node()).find('.dt-tree-toggle');
+      this.renderIcon('expand').data('dt-tree-level', $toggle.data('dt-tree-level')).replaceAll($toggle);
     } else {
       $(row.node()).find('.dt-tree-toggle').removeClass('expanded');
     }
@@ -83,31 +110,53 @@ var TreeView = function () {
     return this.api.column('0:visible');
   };
 
-  TreeView.prototype.prependExpandIcons = function prependExpandIcons() {
-    var _this3 = this;
+  TreeView.prototype.isAlreadyProcessed = function isAlreadyProcessed() {
+    return this.table.find('.dt-tree-toggle, .dt-tree-childless').length > 0;
+  };
+
+  TreeView.prototype.onDraw = function onDraw() {
+    if (!this.isAlreadyProcessed()) {
+      this.prepareAllRows();
+    } else {
+      this.collapseAllRows();
+    }
+  };
+
+  TreeView.prototype.onToggleClick = function onToggleClick(event) {
+    var $toggle = $(event.target);
+    var row = this.api.row($toggle.parents('tr').first());
+    this.toggleRow(row, $toggle.data('dt-tree-level'));
+  };
+
+  TreeView.prototype.prepareAllRows = function prepareAllRows() {
+    var _this5 = this;
 
     this.firstVisibleColumn().nodes().to$().each(function (index, element) {
-      var $el = $(element);
-      var rowData = _this3.api.row(index).data();
-      if (!_this3.options.hasChildren(rowData, index)) {
-        $el.addClass('dt-tree-childless');
-      } else {
-        $el.prepend(_this3.renderIcon('expand'));
-      }
+      return _this5.prepareSingleRow(element, _this5.api.row(index).data(), 0);
     });
   };
 
-  TreeView.prototype.renderChildRow = function renderChildRow(parentRow, data) {
+  TreeView.prototype.prepareSingleRow = function prepareSingleRow(cellElement, rowData, level) {
+    var $el = $(cellElement);
+    if (!this.options.hasChildren(rowData)) {
+      $el.addClass('dt-tree-childless');
+    } else {
+      $el.prepend(this.renderIcon('expand', level));
+    }
+    this.createSpacer($el, level);
+  };
+
+  TreeView.prototype.renderChildRow = function renderChildRow(parentRow, data, parentLevel) {
     var row = this.api.row.add(data);
     var cell = this.api.cell(row.index(), this.firstVisibleColumn().index()).node();
-    $(cell).prepend(this.options.spacer);
+    this.prepareSingleRow(cell, data, parentLevel + 1);
     $(row.node()).detach();
     return row;
   };
 
-  TreeView.prototype.renderIcon = function renderIcon(direction) {
+  TreeView.prototype.renderIcon = function renderIcon(direction, level) {
     var icon = $(this.options[direction + 'Icon']);
-    icon.addClass('dt-tree-toggle');
+    icon.addClass('dt-tree-toggle').data('dt-tree-level', level);
     return icon;
   };
 
@@ -116,11 +165,11 @@ var TreeView = function () {
     $(this.api.cell(row.index(), this.firstVisibleColumn().index()).node()).prepend(this.options.loadingIcon);
   };
 
-  TreeView.prototype.toggleRow = function toggleRow(row) {
+  TreeView.prototype.toggleRow = function toggleRow(row, level) {
     if (row.child.isShown()) {
       this.collapse(row);
     } else {
-      this.expand(row);
+      this.expand(row, level);
     }
   };
 

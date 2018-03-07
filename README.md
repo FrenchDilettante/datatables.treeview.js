@@ -16,7 +16,7 @@ Add `node_modules/datatables.treeview/datatables.treeview.js` to your files.
 $().dataTables({
   treeView: {
     hasChildren: row => row.children.length > 0,
-    getChildren: (row, index, callback) => callback(row.children),
+    getChildren: (row, callback) => callback(row.children),
   },
   /* ... */
 });
@@ -36,7 +36,7 @@ Each child row will be prepended with a spacer that you have to style.
 
 For instance:
 ```css
-.dt-tree-toggle {
+.dt-tree-spacer {
   margin-left: 12px;
 }
 ```
