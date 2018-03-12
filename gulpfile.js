@@ -19,7 +19,7 @@ const files = [
 const header = template(`/*!
 * <%= name %> v<%= version %>
 * <%= description %>
-* Copyright 2018, <%= author %>
+* Copyright 2018, Oath Inc.
 * Licensed under the terms of the <%= license %> license.
 * See LICENSE file in <%= homepage %> for terms.
 */

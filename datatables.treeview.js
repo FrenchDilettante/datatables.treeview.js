@@ -1,9 +1,9 @@
 /*!
 * datatables.treeview v0.3.1
 * DataTables Tree View Plugin
-* Copyright 2018, Oath
+* Copyright 2018, Oath Inc.
 * Licensed under the terms of the MIT license.
-* See LICENSE file in https://git.ouroath.com/ebourge/datatables.treeview.js for terms.
+* See LICENSE file in https://github.com/manudwarf/datatables.treeview.js for terms.
 */
 ;(function($, window, document) {
 'use strict';
