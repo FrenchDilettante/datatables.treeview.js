@@ -5,7 +5,7 @@
 ## Installation
 
 ```
-$ npm install git+ssh://git@git.ouroath.com:ebourge/datatables.treeview.js.git --save
+$ npm install datatables.treeview --save
 ```
 
 Add `node_modules/datatables.treeview/datatables.treeview.js` to your files.
