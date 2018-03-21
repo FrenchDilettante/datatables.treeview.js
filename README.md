@@ -5,7 +5,7 @@
 ## Installation
 
 ```
-$ npm install datatables.treeview --save
+$ npm install datatables.treeview.js --save
 ```
 
 Add `node_modules/datatables.treeview/datatables.treeview.js` to your files.
